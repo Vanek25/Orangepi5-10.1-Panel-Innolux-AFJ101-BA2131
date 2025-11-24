@@ -1,0 +1,162 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "rockchip,rk3588s-orangepi-5";
+
+    fragment@0 {
+        target = <&pwm2>;
+        __overlay__ {
+            status = "okay";
+        };
+    };
+
+    fragment@1 {
+        target-path = "/";
+        __overlay__ {
+            backlight: backlight {
+                compatible = "pwm-backlight";
+                pwms = <&pwm2 0 25000 0>;
+                power-supply = <&vcc5v0_sys>;
+                brightness-levels = <0 16 32 48 64 80 96 112 128 144 160 176 192 200 224 240 255>;
+                default-brightness-level = <16>;
+                enable-gpios = <&gpio1 10 0>;
+                status = "okay";
+            };
+            
+            combophy_avdd1v8: combophy-avdd1v8 {
+                compatible = "regulator-fixed";
+                regulator-name = "combophy_avdd1v8";
+                regulator-min-microvolt = <0x1b7740>; /* 1.8V */
+                regulator-max-microvolt = <0x1b7740>;
+                regulator-boot-on;
+                regulator-always-on;
+                vin-supply = <&vcc_3v3_s0>;
+            };
+
+            combophy_avdd0v85: combophy-avdd0v85 {
+                compatible = "regulator-fixed";
+                regulator-name = "combophy_avdd0v85";
+                regulator-min-microvolt = <0xcf850>; /* 0.85V */
+                regulator-max-microvolt = <0xcf850>;
+                regulator-boot-on;
+                regulator-always-on;
+                vin-supply = <&vcc_3v3_s0>;
+            };
+        };
+    };
+
+    fragment@2 {
+        target = <&dsi0>;
+        __overlay__ {
+            status = "okay";
+
+            panel@0 {
+                status = "okay";
+                compatible = "innolux,afj101-ba2131";
+                reg = <0x00>;
+                power-supply = <&vcc_3v3_s0>;
+                backlight = <&backlight>;
+                reset-gpios = <&gpio1 0x09 0x01>;
+                enable-gpios = <&gpio1 0x00 0x00>;
+                pinctrl-names = "default";
+                pinctrl-0 = <&lcd0_rst_gpio>;
+                video-mode = "video-sync-pulse";
+                bpc = <8>;
+
+                ports {
+                    #address-cells = <0x01>;
+                    #size-cells = <0x00>;
+
+                    port@0 {
+                        reg = <0x00>;
+
+                        panel_in: endpoint {
+                            remote-endpoint = <&dsi0_out>;
+                        };
+                    };
+                };
+            };
+
+            ports {
+                port@0 {
+                    reg = <0>;
+
+                    dsi0_in_vp2: endpoint@0 {
+                        reg = <0>;
+                        remote-endpoint = <&vp2_out_dsi0>;
+                        status = "okay";
+                    };
+
+                    dsi0_in_vp3: endpoint@1 {
+                        reg = <1>;
+                        remote-endpoint = <&vp3_out_dsi0>;
+                        status = "disabled";
+                    };
+                };
+
+                port@1 {
+                    reg = <1>;
+                    dsi0_out: endpoint {
+                        remote-endpoint = <&panel_in>;
+                        status = "okay";
+                    };
+                };
+            };
+        };
+    };
+
+    fragment@3 {
+        target = <&mipi_dcphy0>;
+        __overlay__ {
+            status = "okay";
+        };
+    };
+
+    fragment@4 {
+        target = <&dsi0_in_vp2>;
+        __overlay__ {
+            status = "okay";
+        };
+    };
+
+    fragment@5 {
+        target = <&i2c2>;
+        __overlay__ {
+            status = "okay";
+            touchscreen@14 {
+                compatible = "goodix,gt9271";
+                reg = <0x14>;
+                interrupt-parent = <&gpio1>;
+                interrupts = <0x07 0x08>;
+                irq-gpios = <&gpio1 0x07 0x08>;
+                reset-gpios = <&gpio1 0x04 0x00>;
+                touchscreen-inverted-x;
+                touchscreen-swapped-x-y;
+                touchscreen-size-x = <0x500>;
+                touchscreen-size-y = <0x320>;
+                status = "okay";
+            };
+        };
+    };
+
+    fragment@6 {
+        target = <&i2c7>;
+        __overlay__ {
+            status = "okay";
+            touchscreen@14 {
+                compatible = "goodix,gt9271";
+                reg = <0x14>;
+                interrupt-parent = <&gpio1>;
+                interrupts = <0x0d 0x08>;
+                irq-gpios = <&gpio1 0x0d 0x08>;
+                reset-gpios = <&gpio1 0x0c 0x00>;
+                touchscreen-inverted-x;
+                touchscreen-swapped-x-y;
+                touchscreen-size-x = <0x500>;
+                touchscreen-size-y = <0x320>;
+                status = "okay";
+            };
+        };
+    };
+};
